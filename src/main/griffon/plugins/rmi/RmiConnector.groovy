@@ -24,41 +24,32 @@ import java.util.concurrent.ConcurrentHashMap
  * @author Andres Almiray
  */
 @Singleton
-class RmiConnector {
+class RmiConnector implements RmiProvider {
     private final Map CLIENTS = new ConcurrentHashMap()
 
-    static void enhance(MetaClass mc, Object instance = null) {
-        mc.withRmi = {Map params, Closure closure ->
-            RmiConnector.instance.withRmi(instance, params, closure)
-        }
-        mc.withRmi = {Map params, CallableWithArgs callable ->
-            RmiConnector.instance.withRmi(instance, params, callable)
-        }
+    Object withRmi(Map params, Closure closure) {
+        return doWithClient(params, closure)
     }
 
-    Object withRmi(Object instance = null, Map params, Closure closure) {
-        return doWithClient(instance, params, closure)
-    }
-
-    public <T> T withRmi(Object instance = null, Map params, CallableWithArgs<T> callable) {
-        return doWithClient(instance, params, callable)
+    public <T> T withRmi(Map params, CallableWithArgs<T> callable) {
+        return doWithClient(params, callable)
     }
 
     // ======================================================
 
-    private doWithClient(Object instance, Map params, Closure closure) {
-        def client = configureClient(instance, params)
+    private doWithClient(Map params, Closure closure) {
+        def client = configureClient(params)
 
         if (closure) {
-            closure.delegate = proxy
+            closure.delegate = client
             closure.resolveStrategy = Closure.DELEGATE_FIRST
             return closure()
         }
         return null
     }
 
-    private <T> T doWithClient(Object instance, Map params, CallableWithArgs<T> callable) {
-        def client = configureClient(instance, params)
+    private <T> T doWithClient(Map params, CallableWithArgs<T> callable) {
+        def client = configureClient(params)
 
         if (callable) {
             callable.args = [client] as Object[]
@@ -67,24 +58,14 @@ class RmiConnector {
         return null
     }
 
-    private configureClient(Object instance, Map params) {
+    private configureClient(Map params) {
         def client = null
         if (params.id) {
             String id = params.remove('id').toString()
-            if(instance != null) {
-                MetaClass mc = ApplicationHolder.application.artifactManager.findGriffonClass(instance).metaClass
-                if (mc.hasProperty(instance, id)) {
-                    client = instance."$id"
-                } else {
-                    client = makeClient(params)
-                    mc."$id" = client
-                }
-            } else {
-                client = CLIENTS[id]
-                if(client == null) {
-                    client = makeClient(params)
-                    CLIENTS[id] = client 
-                }
+            client = CLIENTS[id]
+            if(client == null) {
+                client = makeClient(params)
+                CLIENTS[id] = client 
             }
         } else {
             client = makeClient(params)

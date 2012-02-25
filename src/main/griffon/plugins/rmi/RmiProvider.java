@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 the original author or authors.
+ * Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package griffon.plugins.rmi;
+
+import java.util.Map;
+import groovy.lang.Closure;
+import griffon.util.CallableWithArgs;
 
 /**
  * @author Andres Almiray
  */
-
-// check to see if we already have a RmiGriffonAddon
-configText = '''root.'RmiGriffonAddon'.addon=true'''
-if(!(builderConfigFile.text.contains(configText))) {
-    println 'Adding RmiGriffonAddon to Builder.groovy'
-    builderConfigFile.text += '\n' + configText + '\n'
+public interface RmiProvider {
+    Object withRmi(Map params, Closure closure);
+    
+    <T> T withRmi(Map params, CallableWithArgs<T> callable);
 }
