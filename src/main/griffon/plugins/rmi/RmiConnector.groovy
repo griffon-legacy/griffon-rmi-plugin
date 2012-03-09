@@ -16,7 +16,6 @@
 
 package griffon.plugins.rmi
 
-import griffon.util.ApplicationHolder
 import griffon.util.CallableWithArgs
 import java.util.concurrent.ConcurrentHashMap
 

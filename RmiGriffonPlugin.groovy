@@ -176,7 +176,7 @@ types something that is not a number the client will surely break, but the code 
             def calculate = { evt = null ->
                 double a = model.num1.toDouble()
                 double b = model.num2.toDouble()
-                execSync { model.enabled = false }
+                execInsideUISync { model.enabled = false }
                 try {
                     def result = withRmi(host: 'localhost', port: 1199) {
                         service('exporter.Calculator') {
@@ -199,7 +199,7 @@ $griffonProject points to the calculator application
     
 7. Run the application
 
-    griffon run-app
+        griffon run-app
     
 The first argument to `service()` may be a String with the full qualified classname or a Class.
 
@@ -219,12 +219,14 @@ Here's how the above service call may be written in Java
         Map params = map().e("host", "localhost")
                           .e("port", 1199);
         Double result = RmiConnector.getInstance().withRmi(params, new CallableWithArgs<Double>() {
-            RMIClient client = (RMIClient) args[0];
-            return client.service("Calculator", new CallableWithArgs<Double>() {
-                public Double call(Object[] args2) {
-                    return ((Calculator) args2[0]).add(a, b);
-                }
-            });
+            public Double call(Object[] args) {
+                RMIClient client = (RMIClient) args[0];
+                return (Double) client.service("Calculator", new CallableWithArgs<Double>() {
+                    public Double call(Object[] args2) {
+                        return ((Calculator) args2[0]).add(a, b);
+                    }
+                });
+            }
         });
 
 Testing
