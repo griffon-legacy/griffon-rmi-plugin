@@ -24,8 +24,23 @@ import java.util.Map;
 /**
  * @author Andres Almiray
  */
-public interface RmiProvider {
-    <R> R withRmi(Map<String, Object> params, Closure<R> closure);
+public abstract class AbstractRmiProvider implements RmiProvider {
+    public <R> R withRmi(Map<String, Object> params, Closure<R> closure) {
+        if (closure != null) {
+            closure.setDelegate(getRmiClient(params));
+            closure.setResolveStrategy(Closure.DELEGATE_FIRST);
+            return closure.call();
+        }
+        return null;
+    }
 
-    <R> R withRmi(Map<String, Object> params, CallableWithArgs<R> callable);
+    public <R> R withRmi(Map<String, Object> params, CallableWithArgs<R> callable) {
+        if (callable != null) {
+            callable.setArgs(new Object[]{getRmiClient(params)});
+            return callable.call();
+        }
+        return null;
+    }
+
+    protected abstract RmiClient getRmiClient(Map<String, Object> params);
 }

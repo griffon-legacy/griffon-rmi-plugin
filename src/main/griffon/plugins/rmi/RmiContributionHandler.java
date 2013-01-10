@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import griffon.core.GriffonClass
-import griffon.plugins.rmi.RmiEnhancer
-import griffon.plugins.rmi.RmiContributionHandler
+package griffon.plugins.rmi;
+
+import griffon.util.CallableWithArgs;
+import groovy.lang.Closure;
+
+import java.util.Map;
 
 /**
  * @author Andres Almiray
  */
-class RmiGriffonAddon {
-    void addonPostInit(GriffonApplication app) {
-        def types = app.config.griffon?.rmi?.injectInto ?: ['controller']
-        for(String type : types) {
-            for(GriffonClass gc : app.artifactManager.getClassesOfType(type)) {
-                if (RmiContributionHandler.isAssignableFrom(gc.clazz)) continue
-                RmiEnhancer.enhance(gc.metaClass)
-            }
-        }
-    }
+public interface RmiContributionHandler {
+    void setRmiProvider(RmiProvider provider);
+
+    RmiProvider getRmiProvider();
+
+    <R> R withRmi(Map<String, Object> params, Closure<R> closure);
+
+    <R> R withRmi(Map<String, Object> params, CallableWithArgs<R> callable);
 }

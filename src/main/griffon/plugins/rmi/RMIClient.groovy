@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 the original author or authors.
+ * Copyright 2009-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import java.rmi.registry.LocateRegistry
 /**
  * @author Andres Almiray
  */
-class RMIClient {
+class RmiClient {
    private final Map services = [:]
    private final String host
    private final int port
    private Registry registry
 
-   RMIClient(String host, int port, boolean lazy) {
+   RmiClient(String host, int port, boolean lazy) {
       this.host = host
       this.port = port
       if(!lazy) {

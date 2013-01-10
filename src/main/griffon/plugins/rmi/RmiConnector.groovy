@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,68 +16,17 @@
 
 package griffon.plugins.rmi
 
-import griffon.util.CallableWithArgs
-import java.util.concurrent.ConcurrentHashMap
-
 /**
  * @author Andres Almiray
  */
 @Singleton
-class RmiConnector implements RmiProvider {
-    private final Map CLIENTS = new ConcurrentHashMap()
-
-    Object withRmi(Map params, Closure closure) {
-        return doWithClient(params, closure)
-    }
-
-    public <T> T withRmi(Map params, CallableWithArgs<T> callable) {
-        return doWithClient(params, callable)
-    }
-
-    // ======================================================
-
-    private doWithClient(Map params, Closure closure) {
-        def client = configureClient(params)
-
-        if (closure) {
-            closure.delegate = client
-            closure.resolveStrategy = Closure.DELEGATE_FIRST
-            return closure()
-        }
-        return null
-    }
-
-    private <T> T doWithClient(Map params, CallableWithArgs<T> callable) {
-        def client = configureClient(params)
-
-        if (callable) {
-            callable.args = [client] as Object[]
-            return callable.run()
-        }
-        return null
-    }
-
-    private configureClient(Map params) {
-        def client = null
-        if (params.id) {
-            String id = params.remove('id').toString()
-            client = CLIENTS[id]
-            if(client == null) {
-                client = makeClient(params)
-                CLIENTS[id] = client 
-            }
-        } else {
-            client = makeClient(params)
-        }
-        client
-    }
-
-    private makeClient(Map params) {
+class RmiConnector {
+    public RmiClient createClient(Map params) {
         def host = params.remove('host') ?: 'localhost'
         def port = params.remove('port') ?: 1199
         def lazy = params.remove('lazy') ?: true
         try {
-            return new RMIClient(host, port as int, lazy)
+            return new RmiClient(host, port as int, lazy)
         } catch(Exception e) {
             throw new RuntimeException("Failed to create RMI client, reason: $e", e)
         }

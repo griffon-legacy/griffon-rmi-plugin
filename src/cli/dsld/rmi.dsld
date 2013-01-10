@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import griffon.core.GriffonClass
-import griffon.plugins.rmi.RmiEnhancer
-import griffon.plugins.rmi.RmiContributionHandler
+package dsld
 
 /**
  * @author Andres Almiray
  */
-class RmiGriffonAddon {
-    void addonPostInit(GriffonApplication app) {
-        def types = app.config.griffon?.rmi?.injectInto ?: ['controller']
-        for(String type : types) {
-            for(GriffonClass gc : app.artifactManager.getClassesOfType(type)) {
-                if (RmiContributionHandler.isAssignableFrom(gc.clazz)) continue
-                RmiEnhancer.enhance(gc.metaClass)
-            }
-        }
-    }
+
+contribute(enclosingClass(annotatedBy('griffon.plugins.rmi.RmiAware'))) {
+    provider = "Rmi DSL"
+    delegatesTo "griffon.plugins.rmi.RmiContributionHandler"
 }
