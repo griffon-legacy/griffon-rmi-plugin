@@ -32,11 +32,9 @@ class RmiClientHolder {
         INSTANCE
     }
 
+    private RmiClientHolder() {}
+
     private final Map<String, RmiClient> CLIENTS = new ConcurrentHashMap<String, RmiClient>()
-
-    private RmiClientHolder() {
-
-    }
 
     String[] getRmiClientIds() {
         List<String> ids = []

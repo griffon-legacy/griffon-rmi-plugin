@@ -32,6 +32,8 @@ public class DefaultRmiProvider extends AbstractRmiProvider {
         return INSTANCE;
     }
 
+    private DefaultRmiProvider() {}
+
     @Override
     protected RmiClient getRmiClient(Map<String, Object> params) {
         return RmiClientHolder.getInstance().fetchRmiClient(params);
